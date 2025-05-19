@@ -1,0 +1,62 @@
+Deadlock Example (Problem)
+java
+// Thread 1
+synchronized(LOCK_1) {
+    synchronized(LOCK_2) { ... }
+}
+
+// Thread 2
+synchronized(LOCK_2) {
+    synchronized(LOCK_1) { ... }  // ← Circular wait! Deadlock!
+}
+What Happens:
+
+Thread 1 acquires LOCK_1
+
+Thread 2 acquires LOCK_2
+
+Both threads wait forever for the other's lock
+
+Program hangs indefinitely
+
+Deadlock Prevention Example (Solution)
+java
+// Both Threads
+synchronized(FIRST_LOCK) {    // ← Always LOCK_1 first
+    synchronized(SECOND_LOCK) { ... }
+}
+Key Fixes:
+
+Consistent Lock Order: Both threads acquire locks in same order (LOCK_1 → LOCK_2)
+
+Single Thread Class: Replaces two classes with one configurable WorkerThread
+
+Safety Improvements:
+
+final lock objects
+
+Proper interrupt handling
+
+Clean resource release
+
+Output (No Deadlock):
+
+Thread-1: Acquired LOCK_1 → LOCK_2
+Thread-2: Waits for LOCK_1, then gets LOCK_2
+All threads complete
+Why It Works
+Deadlock Condition	Original Example	Prevention Example
+Mutual Exclusion	✅ (Locks exist)	✅ (Still needed)
+Hold & Wait	✅ (Keeps 1st lock)	✅ (Still needed)
+No Preemption	✅ (Can't force release)	✅ (Unchanged)
+Circular Wait	❌ (LOCK_1↔LOCK_2)	FIXED (Only LOCK_1→LOCK_2)
+By eliminating the circular wait, we break one of the four necessary conditions for deadlock.
+
+Key Takeaways
+Always acquire locks in a global order (e.g., sort locks by hashcode)
+
+Use timeouts (e.g., tryLock() with wait time)
+
+Design thread classes to be reusable (like WorkerThread)
+
+Never ignore InterruptedException (handle or propagate it)
